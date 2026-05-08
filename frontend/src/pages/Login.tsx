@@ -27,7 +27,7 @@ export default function Login() {
             setAuthed(true);
             setError('');
         } catch {
-            setError('Invalid API key');
+            setError('密钥无效');
         }
     }
 
@@ -113,7 +113,7 @@ export default function Login() {
             if (data.status === 'success') {
                 navigate('/');
             } else {
-                setError(data.error || '2FA failed');
+                setError(data.error || '两步验证失败');
             }
         } catch (e: unknown) {
             setError(String(e));
@@ -130,13 +130,13 @@ export default function Login() {
                 {!authed ? (
                     <form onSubmit={handleKeySubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Admin API Key</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">管理密钥</label>
                             <input
                                 type="password"
                                 value={key}
                                 onChange={(e) => setKey(e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Enter your admin API key"
+                                placeholder="请输入管理密钥"
                             />
                         </div>
                         {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -144,12 +144,12 @@ export default function Login() {
                             type="submit"
                             className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                         >
-                            Verify Key
+                            验证
                         </button>
                     </form>
                 ) : (
                     <div className="space-y-4">
-                        <p className="text-green-600 text-sm">API key verified</p>
+                        <p className="text-green-600 text-sm">密钥验证通过</p>
 
                         {!show2fa && (
                             <>
@@ -162,7 +162,7 @@ export default function Login() {
                                                 : 'border-transparent text-gray-500 hover:text-gray-700'
                                         }`}
                                     >
-                                        QR Code
+                                        扫码登录
                                     </button>
                                     <button
                                         onClick={() => { setLoginMethod('phone'); setError(''); }}
@@ -172,7 +172,7 @@ export default function Login() {
                                                 : 'border-transparent text-gray-500 hover:text-gray-700'
                                         }`}
                                     >
-                                        Phone
+                                        手机号登录
                                     </button>
                                 </div>
 
@@ -184,24 +184,24 @@ export default function Login() {
                                                     onClick={startQrLogin}
                                                     className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                                                 >
-                                                    Scan QR to login Telegram
+                                                    生成二维码
                                                 </button>
                                             </div>
                                         )}
 
                                         {qrImage && qrStatus === 'waiting' && (
                                             <div className="text-center space-y-3">
-                                                <p className="text-sm text-gray-600">Scan with Telegram mobile app</p>
+                                                <p className="text-sm text-gray-600">请使用 Telegram 手机客户端扫码</p>
                                                 <img src={qrImage} alt="QR Code" className="mx-auto w-48 h-48" />
-                                                <p className="text-xs text-gray-400">Waiting for scan...</p>
+                                                <p className="text-xs text-gray-400">等待扫码...</p>
                                             </div>
                                         )}
 
                                         {qrStatus === 'expired' && (
                                             <div className="text-center space-y-3">
-                                                <p className="text-sm text-amber-600">QR code expired</p>
+                                                <p className="text-sm text-amber-600">二维码已过期</p>
                                                 <button onClick={refreshQr} className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                                    Generate New QR
+                                                    重新生成
                                                 </button>
                                             </div>
                                         )}
@@ -213,7 +213,7 @@ export default function Login() {
                                         {(!phoneStatus || phoneStatus === 'idle') && (
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">手机号</label>
                                                     <input
                                                         type="tel"
                                                         value={phone}
@@ -221,46 +221,46 @@ export default function Login() {
                                                         className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                         placeholder="+8613800138000"
                                                     />
-                                                    <p className="text-xs text-gray-400 mt-1">International format with + prefix</p>
+                                                    <p className="text-xs text-gray-400 mt-1">请使用国际格式，以 + 开头</p>
                                                 </div>
                                                 <button
                                                     onClick={sendCode}
                                                     className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                                                 >
-                                                    Send Code
+                                                    发送验证码
                                                 </button>
                                             </div>
                                         )}
 
                                         {phoneStatus === 'code_sent' && (
                                             <form onSubmit={verifyCode} className="space-y-3">
-                                                <p className="text-sm text-green-600">Verification code sent to {phone}</p>
+                                                <p className="text-sm text-green-600">验证码已发送至 {phone}</p>
                                                 <input
                                                     type="text"
                                                     value={verificationCode}
                                                     onChange={(e) => setVerificationCode(e.target.value)}
                                                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    placeholder="Enter verification code"
+                                                    placeholder="请输入验证码"
                                                     autoFocus
                                                 />
                                                 <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                                    Verify
+                                                    验证
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={sendCode}
                                                     className="w-full py-1 text-sm text-blue-600 hover:text-blue-800"
                                                 >
-                                                    Resend Code
+                                                    重新发送
                                                 </button>
                                             </form>
                                         )}
 
                                         {phoneStatus === 'expired' && (
                                             <div className="text-center space-y-3">
-                                                <p className="text-sm text-amber-600">Verification code expired</p>
+                                                <p className="text-sm text-amber-600">验证码已过期</p>
                                                 <button onClick={sendCode} className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                                    Resend Code
+                                                    重新发送
                                                 </button>
                                             </div>
                                         )}
@@ -271,7 +271,7 @@ export default function Login() {
                                                     onClick={() => { setPhoneStatus(''); setError(''); }}
                                                     className="w-full py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
                                                 >
-                                                    Try Again
+                                                    重试
                                                 </button>
                                             </div>
                                         )}
@@ -282,23 +282,23 @@ export default function Login() {
                                     onClick={() => navigate('/')}
                                     className="w-full py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
                                 >
-                                    Skip (already logged in)
+                                    跳过（已登录）
                                 </button>
                             </>
                         )}
 
                         {show2fa && (
                             <form onSubmit={handle2fa} className="space-y-3">
-                                <p className="text-sm text-amber-600">Two-factor authentication required</p>
+                                <p className="text-sm text-amber-600">需要两步验证密码</p>
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter 2FA password"
+                                    placeholder="请输入两步验证密码"
                                 />
                                 <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                    Submit
+                                    提交
                                 </button>
                             </form>
                         )}

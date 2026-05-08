@@ -2,12 +2,12 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { clearApiKey } from '../api/client';
 
 const navItems = [
-    { to: '/', label: 'Dashboard' },
-    { to: '/channels', label: 'Channels' },
-    { to: '/messages', label: 'Messages' },
-    { to: '/sync-jobs', label: 'Sync Jobs' },
-    { to: '/webhook-logs', label: 'Webhook Logs' },
-    { to: '/config-check', label: 'Config Check' },
+    { to: '/', label: '仪表盘' },
+    { to: '/channels', label: '频道' },
+    { to: '/messages', label: '消息' },
+    { to: '/sync-jobs', label: '同步任务' },
+    { to: '/webhook-logs', label: 'Webhook 日志' },
+    { to: '/config-check', label: '配置检查' },
 ];
 
 export default function Layout() {
@@ -23,7 +23,7 @@ export default function Layout() {
             <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
                 <div className="p-4 border-b border-gray-200">
                     <h1 className="text-lg font-bold text-gray-900">TeleAPI</h1>
-                    <p className="text-xs text-gray-500">Admin Panel</p>
+                    <p className="text-xs text-gray-500">管理面板</p>
                 </div>
                 <nav className="flex-1 p-2 space-y-1">
                     {navItems.map((item) => (
@@ -48,7 +48,7 @@ export default function Layout() {
                         onClick={handleLogout}
                         className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded text-left"
                     >
-                        Logout
+                        退出登录
                     </button>
                 </div>
             </aside>

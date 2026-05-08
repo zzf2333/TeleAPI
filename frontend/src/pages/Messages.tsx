@@ -62,7 +62,7 @@ export default function Messages() {
 
     return (
         <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Messages</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">消息</h2>
 
             <form onSubmit={handleSearch} className="flex gap-3 mb-4">
                 <select
@@ -70,7 +70,7 @@ export default function Messages() {
                     onChange={(e) => setSelectedChannel(e.target.value)}
                     className="px-3 py-2 border border-gray-300 rounded text-sm"
                 >
-                    <option value="">All channels</option>
+                    <option value="">全部频道</option>
                     {channels.map((ch) => (
                         <option key={ch.id} value={ch.id}>
                             @{ch.username}
@@ -81,11 +81,11 @@ export default function Messages() {
                     type="text"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
-                    placeholder="Search keyword..."
+                    placeholder="搜索关键词..."
                     className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm"
                 />
                 <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
-                    Search
+                    搜索
                 </button>
             </form>
 
@@ -93,11 +93,11 @@ export default function Messages() {
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Channel</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Type</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Content</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Link</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">时间</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">频道</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">类型</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">内容</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">链接</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -111,7 +111,7 @@ export default function Messages() {
                                 <td className="px-4 py-3 max-w-md truncate">{m.text || '-'}</td>
                                 <td className="px-4 py-3">
                                     <a href={m.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-xs">
-                                        Open
+                                        打开
                                     </a>
                                 </td>
                             </tr>
@@ -119,7 +119,7 @@ export default function Messages() {
                         {messages.length === 0 && (
                             <tr>
                                 <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
-                                    No messages
+                                    暂无消息
                                 </td>
                             </tr>
                         )}
@@ -132,7 +132,7 @@ export default function Messages() {
                     onClick={() => loadMessages(nextCursor)}
                     className="mt-4 px-4 py-2 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50"
                 >
-                    Load more
+                    加载更多
                 </button>
             )}
         </div>

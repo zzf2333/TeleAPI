@@ -21,18 +21,18 @@ export default function WebhookLogs() {
 
     return (
         <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Webhook Delivery Logs</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Webhook 推送日志</h2>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
                             <th className="text-left px-4 py-3 font-medium text-gray-500">Webhook</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Event</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
-                            <th className="text-right px-4 py-3 font-medium text-gray-500">HTTP Code</th>
-                            <th className="text-right px-4 py-3 font-medium text-gray-500">Attempts</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Error</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Time</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">事件</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">状态</th>
+                            <th className="text-right px-4 py-3 font-medium text-gray-500">HTTP 状态码</th>
+                            <th className="text-right px-4 py-3 font-medium text-gray-500">重试次数</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">错误</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">时间</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -60,7 +60,7 @@ export default function WebhookLogs() {
                         {deliveries.length === 0 && (
                             <tr>
                                 <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                                    No webhook deliveries
+                                    暂无推送记录
                                 </td>
                             </tr>
                         )}
