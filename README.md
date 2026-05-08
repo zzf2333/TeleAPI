@@ -36,9 +36,15 @@ TeleAPI 是一个轻量级 Telegram 频道 API 网关。它以用户账号连接
 
 ## 快速开始
 
+### 前置条件
+
+- Docker 和 Docker Compose（推荐）
+- 或 Python 3.12+ 和 [uv](https://github.com/astral-sh/uv)（本地开发）
+- Telegram API 凭证（`api_id` + `api_hash`）
+
 ### 1. 获取 Telegram API 凭证
 
-前往 [my.telegram.org](https://my.telegram.org) 创建应用，获取 `api_id` 和 `api_hash`。
+前往 [my.telegram.org](https://my.telegram.org) → API development tools → 创建应用，获取 `api_id` 和 `api_hash`。
 
 ### 2. 配置
 
@@ -52,10 +58,18 @@ cp config.example.yaml config.yaml
 - `security.admin_api_key`（至少 16 位，不可使用弱密码）
 - 需要监听的频道列表
 
-### 3. Docker 启动
+### 3. 启动
+
+**Docker（推荐）：**
 
 ```bash
 docker compose up -d
+```
+
+**本地：**
+
+```bash
+uv sync && make dev
 ```
 
 ### 4. 登录
@@ -64,14 +78,97 @@ docker compose up -d
 
 ---
 
+## Docker 部署
+
+### 架构
+
+```
+┌─────────────────────────────────────┐
+│          Docker Container           │
+│                                     │
+│  ┌──────────┐    ┌──────────────┐   │
+│  │ Frontend │    │   FastAPI    │   │
+│  │ (静态)   │────│   Backend    │   │     ┌──────────┐
+│  └──────────┘    │              │───│────▶│ Telegram  │
+│                  │  ┌────────┐  │   │     │  MTProto  │
+│                  │  │ SQLite │  │   │     └──────────┘
+│                  │  └────────┘  │   │
+│                  └──────────────┘   │
+│         :8080                       │
+└─────────────────────────────────────┘
+      ▲               ▲
+      │               │
+  config.yaml     data/ (持久化)
+  (只读挂载)      (session + db)
+```
+
+### 启动
+
+```bash
+# 构建并启动
+docker compose up -d
+
+# 查看日志
+docker compose logs -f
+
+# 停止
+docker compose down
+```
+
+### 数据持久化
+
+| 路径 | 说明 |
+|------|------|
+| `./data/teleapi.db` | SQLite 数据库（频道、消息、同步任务、Webhook 日志） |
+| `./data/session.key` | Telegram 登录会话（登录后自动生成） |
+| `./config.yaml` | 配置文件（只读挂载进容器） |
+
+`data/` 目录通过 Docker volume 持久化，重启容器不会丢失数据和登录状态。
+
+### 纯环境变量部署
+
+不挂载 `config.yaml`，改用环境变量 + 内置默认值：
+
+```yaml
+services:
+    teleapi:
+        image: teleapi
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./data:/app/data
+        environment:
+            - TELEAPI_TELEGRAM_API_ID=123456
+            - TELEAPI_TELEGRAM_API_HASH=your_api_hash
+            - TELEAPI_SECURITY_ADMIN_API_KEY=your_strong_key_here
+```
+
+### 自定义端口
+
+```yaml
+services:
+    teleapi:
+        ports:
+            - "3000:8080"    # 宿主机 3000 → 容器 8080
+```
+
+### 健康检查
+
+容器内置健康检查，每 30 秒检测一次 `/health` 端点：
+
+```bash
+docker inspect --format='{{.State.Health.Status}}' teleapi-teleapi-1
+```
+
+---
+
 ## 本地开发
 
 ```bash
 # 安装依赖
-uv sync
-cp config.example.yaml config.yaml
+make install
 
-# 一键启动前后端
+# 一键启动前后端（自动清理残留进程）
 make dev
 
 # 或分别启动
@@ -79,13 +176,26 @@ uv run uvicorn teleapi.main:app --host 0.0.0.0 --port 8080 --reload  # 后端
 cd frontend && npm install && npm run dev                              # 前端
 ```
 
-### 测试
+### 常用命令
 
 ```bash
-uv run pytest tests/ -v          # 全量 222 个测试
-uv run pytest -m unit            # 仅单元测试
-uv run pytest -m api             # 仅 API 测试
-uv run ruff check src/ tests/    # Lint
+make test          # 全量 222 个测试
+make lint          # Ruff lint
+make build         # 构建前端
+make docker-build  # 构建 Docker 镜像
+make docker-up     # 启动容器
+make docker-down   # 停止容器
+make docker-logs   # 查看日志
+```
+
+### 按层级运行测试
+
+```bash
+uv run pytest -m unit      # 纯逻辑
+uv run pytest -m db        # 数据库
+uv run pytest -m service   # 服务层
+uv run pytest -m api       # API 路由
+uv run pytest -m e2e       # 端到端
 ```
 
 ---

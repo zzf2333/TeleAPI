@@ -28,8 +28,13 @@ class TelegramClientManager:
     async def connect(self):
         session_string = ""
         if SESSION_FILE.exists():
-            session_string = SESSION_FILE.read_text().strip()
-            logger.info("Loaded existing session from %s", SESSION_FILE)
+            raw = SESSION_FILE.read_text().strip()
+            try:
+                StringSession(raw)
+                session_string = raw
+                logger.info("Loaded existing session from %s", SESSION_FILE)
+            except (ValueError, Exception) as e:
+                logger.warning("Invalid session file %s (%s), starting fresh", SESSION_FILE, e)
 
         self._client = TelegramClient(
             StringSession(session_string),
@@ -42,7 +47,7 @@ class TelegramClientManager:
             me = await self._client.get_me()
             logger.info("Telegram session restored: %s (id=%s)", me.first_name, me.id)
         else:
-            logger.info("Telegram session not authorized, QR login required")
+            logger.info("Telegram session not authorized, login required")
 
     async def is_authorized(self) -> bool:
         if self._client is None:

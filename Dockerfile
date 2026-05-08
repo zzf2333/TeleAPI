@@ -17,6 +17,8 @@ COPY src/ src/
 COPY config.example.yaml config.example.yaml
 COPY --from=frontend-builder /app/frontend/dist frontend/dist
 
+RUN mkdir -p /app/data
+
 EXPOSE 8080
 VOLUME /app/data
 

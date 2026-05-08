@@ -33,7 +33,7 @@ class TestTelegramClientManager:
             MockClient.return_value = mock
             await cm.connect()
         assert cm._client is not None
-        MockSession.assert_called_once_with("existing_session")
+        assert any(call.args == ("existing_session",) for call in MockSession.call_args_list)
 
     def test_client_property_before_connect(self):
         cm = TelegramClientManager(api_id=123, api_hash="abc")

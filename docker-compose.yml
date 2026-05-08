@@ -10,7 +10,8 @@ services:
             - TELEAPI_CONFIG=/app/config.yaml
         restart: unless-stopped
         healthcheck:
-            test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+            test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
             interval: 30s
             timeout: 5s
             retries: 3
+            start_period: 10s

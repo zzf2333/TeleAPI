@@ -1,4 +1,4 @@
-.PHONY: dev dev-backend dev-frontend dev-stop install build clean
+.PHONY: dev dev-backend dev-frontend dev-stop install build clean docker-build docker-up docker-down docker-logs test lint
 
 dev: dev-stop
 	@trap 'kill 0' EXIT; \
@@ -25,3 +25,21 @@ build:
 
 clean:
 	rm -rf frontend/dist frontend/node_modules/__vite
+
+docker-build:
+	docker compose build
+
+docker-up:
+	docker compose up -d
+
+docker-down:
+	docker compose down
+
+docker-logs:
+	docker compose logs -f
+
+test:
+	uv run pytest tests/ -v
+
+lint:
+	uv run ruff check src/ tests/
