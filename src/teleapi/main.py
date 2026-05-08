@@ -14,7 +14,7 @@ from teleapi.config import TeleAPIConfig, load_config
 from teleapi.database import close_db, init_db, init_engine
 from teleapi.database import _async_session_factory
 from teleapi.telegram.client import TelegramClientManager
-from teleapi.telegram.login import QRLoginService
+from teleapi.telegram.login import QRLoginService, PhoneLoginService
 from teleapi.telegram.channel_manager import ChannelManager
 from teleapi.telegram.sync import HistorySyncService
 from teleapi.telegram.listener import RealtimeListener
@@ -71,6 +71,7 @@ async def lifespan(app: FastAPI):
     app.state.config = config
     app.state.telegram_client = telegram_client
     app.state.login_service = QRLoginService(telegram_client)
+    app.state.phone_login_service = PhoneLoginService(telegram_client)
     app.state.channel_manager = channel_manager
     app.state.sync_service = sync_service
     app.state.event_dispatcher = event_dispatcher

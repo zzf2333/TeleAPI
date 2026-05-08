@@ -5,13 +5,17 @@ from fastapi.responses import JSONResponse
 
 from teleapi.auth import verify_api_key
 from teleapi.telegram.client import TelegramClientManager
-from teleapi.telegram.login import LoginStatus, QRLoginService
+from teleapi.telegram.login import LoginStatus, QRLoginService, PhoneLoginService
 
 router = APIRouter(prefix="/api/auth", tags=["auth"], dependencies=[Depends(verify_api_key)])
 
 
 def _get_login_service(request: Request) -> QRLoginService:
     return request.app.state.login_service
+
+
+def _get_phone_login_service(request: Request) -> PhoneLoginService:
+    return request.app.state.phone_login_service
 
 
 def _get_client_manager(request: Request) -> TelegramClientManager:
@@ -48,6 +52,46 @@ async def refresh_qr(request: Request):
     }
 
 
+@router.post("/phone-login/send-code")
+async def phone_send_code(request: Request):
+    body = await request.json()
+    phone = body.get("phone", "").strip()
+    if not phone:
+        return JSONResponse({"error": "phone is required"}, status_code=400)
+
+    svc = _get_phone_login_service(request)
+    state = await svc.send_code(phone)
+    resp = {"status": state.status.value}
+    if state.error:
+        resp["error"] = state.error
+    return resp
+
+
+@router.post("/phone-login/verify-code")
+async def phone_verify_code(request: Request):
+    body = await request.json()
+    code = body.get("code", "").strip()
+    if not code:
+        return JSONResponse({"error": "code is required"}, status_code=400)
+
+    svc = _get_phone_login_service(request)
+    state = await svc.verify_code(code)
+    resp = {"status": state.status.value}
+    if state.error:
+        resp["error"] = state.error
+    return resp
+
+
+@router.get("/phone-login/status")
+async def phone_login_status(request: Request):
+    svc = _get_phone_login_service(request)
+    state = svc.state
+    resp = {"status": state.status.value}
+    if state.error:
+        resp["error"] = state.error
+    return resp
+
+
 @router.post("/2fa")
 async def submit_2fa(request: Request):
     body = await request.json()
@@ -55,8 +99,13 @@ async def submit_2fa(request: Request):
     if not password:
         return JSONResponse({"error": "password is required"}, status_code=400)
 
-    svc = _get_login_service(request)
-    state = await svc.submit_2fa(password)
+    phone_svc = _get_phone_login_service(request)
+    if phone_svc.state.status == LoginStatus.TWO_FA_REQUIRED:
+        state = await phone_svc.submit_2fa(password)
+    else:
+        svc = _get_login_service(request)
+        state = await svc.submit_2fa(password)
+
     resp = {"status": state.status.value}
     if state.error:
         resp["error"] = state.error
@@ -76,7 +125,9 @@ async def auth_status(request: Request):
 @router.post("/logout")
 async def logout(request: Request):
     cm = _get_client_manager(request)
-    svc = _get_login_service(request)
+    qr_svc = _get_login_service(request)
+    phone_svc = _get_phone_login_service(request)
     await cm.logout()
-    svc.reset()
+    qr_svc.reset()
+    phone_svc.reset()
     return {"status": "logged_out"}

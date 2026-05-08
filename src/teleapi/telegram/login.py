@@ -8,7 +8,13 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 import qrcode
-from telethon.errors import SessionPasswordNeededError
+from telethon.errors import (
+    SessionPasswordNeededError,
+    PhoneNumberInvalidError,
+    PhoneCodeExpiredError,
+    PhoneCodeInvalidError,
+    FloodWaitError,
+)
 
 from teleapi.telegram.client import TelegramClientManager
 
@@ -18,6 +24,7 @@ logger = logging.getLogger("teleapi.telegram.login")
 class LoginStatus(str, Enum):
     IDLE = "idle"
     WAITING = "waiting"
+    CODE_SENT = "code_sent"
     TWO_FA_REQUIRED = "2fa_required"
     SUCCESS = "success"
     EXPIRED = "expired"
@@ -117,3 +124,85 @@ class QRLoginService:
         if self._state._task and not self._state._task.done():
             self._state._task.cancel()
         self._state = LoginState()
+
+
+@dataclass
+class PhoneLoginState:
+    status: LoginStatus = LoginStatus.IDLE
+    phone: str = ""
+    phone_code_hash: str = ""
+    error: str = ""
+
+
+class PhoneLoginService:
+
+    def __init__(self, client_manager: TelegramClientManager):
+        self._cm = client_manager
+        self._state = PhoneLoginState()
+
+    @property
+    def state(self) -> PhoneLoginState:
+        return self._state
+
+    async def send_code(self, phone: str) -> PhoneLoginState:
+        try:
+            result = await self._cm.client.send_code_request(phone)
+            self._state.phone = phone
+            self._state.phone_code_hash = result.phone_code_hash
+            self._state.status = LoginStatus.CODE_SENT
+            self._state.error = ""
+            logger.info("Verification code sent to %s", phone)
+        except PhoneNumberInvalidError:
+            self._state.status = LoginStatus.ERROR
+            self._state.error = "手机号格式无效，请使用国际格式（如 +86...）"
+        except FloodWaitError as e:
+            self._state.status = LoginStatus.ERROR
+            self._state.error = f"请求过于频繁，请在 {e.seconds} 秒后重试"
+        except Exception as e:
+            self._state.status = LoginStatus.ERROR
+            self._state.error = str(e)
+            logger.error("Send code error: %s", e)
+        return self._state
+
+    async def verify_code(self, code: str) -> PhoneLoginState:
+        try:
+            await self._cm.client.sign_in(
+                phone=self._state.phone,
+                code=code,
+                phone_code_hash=self._state.phone_code_hash,
+            )
+            self._cm.save_session()
+            self._state.status = LoginStatus.SUCCESS
+            logger.info("Phone login success")
+        except PhoneCodeInvalidError:
+            self._state.status = LoginStatus.ERROR
+            self._state.error = "验证码错误"
+        except PhoneCodeExpiredError:
+            self._state.status = LoginStatus.EXPIRED
+            self._state.error = "验证码已过期，请重新发送"
+        except SessionPasswordNeededError:
+            self._state.status = LoginStatus.TWO_FA_REQUIRED
+            logger.info("Phone login: 2FA password required")
+        except FloodWaitError as e:
+            self._state.status = LoginStatus.ERROR
+            self._state.error = f"请求过于频繁，请在 {e.seconds} 秒后重试"
+        except Exception as e:
+            self._state.status = LoginStatus.ERROR
+            self._state.error = str(e)
+            logger.error("Phone login error: %s", e)
+        return self._state
+
+    async def submit_2fa(self, password: str) -> PhoneLoginState:
+        try:
+            await self._cm.client.sign_in(password=password)
+            self._cm.save_session()
+            self._state.status = LoginStatus.SUCCESS
+            logger.info("2FA login success")
+        except Exception as e:
+            self._state.status = LoginStatus.ERROR
+            self._state.error = str(e)
+            logger.error("2FA login error: %s", e)
+        return self._state
+
+    def reset(self):
+        self._state = PhoneLoginState()
