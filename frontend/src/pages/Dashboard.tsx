@@ -47,7 +47,8 @@ export default function Dashboard() {
                     </p>
                     {status.telegram.user && (
                         <p className="text-sm text-gray-600">
-                            {status.telegram.user.first_name} (@{status.telegram.user.username})
+                            {status.telegram.user.first_name}
+                            {status.telegram.user.username && ` (@${status.telegram.user.username})`}
                         </p>
                     )}
                 </Card>
