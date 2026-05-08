@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 
+from teleapi.auth import verify_api_key
 from teleapi.telegram.client import TelegramClientManager
 from teleapi.telegram.login import LoginStatus, QRLoginService
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+router = APIRouter(prefix="/api/auth", tags=["auth"], dependencies=[Depends(verify_api_key)])
 
 
 def _get_login_service(request: Request) -> QRLoginService:

@@ -109,6 +109,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="TeleAPI",
     version=__version__,
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
     lifespan=lifespan,
 )
 

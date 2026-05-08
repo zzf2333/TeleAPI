@@ -8,6 +8,7 @@ build/
 .env
 .env.*
 data/
+config.yaml
 node_modules/
 frontend/dist/
 .ruff_cache/
