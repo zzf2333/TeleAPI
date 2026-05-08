@@ -1,25 +1,44 @@
-# TeleAPI
+<div align="center">
 
-A lightweight Telegram channel API gateway.
+<h1>TeleAPI</h1>
 
-TeleAPI 将你已订阅的 Telegram 频道内容同步为结构化数据，并通过 REST API 和 Webhook 对外提供访问能力。
+<p><strong>把 Telegram 频道变成你的结构化数据 API。</strong></p>
 
-## Features
+<p>
+  <a href="https://github.com/zzf2333/TeleAPI/actions"><img src="https://img.shields.io/github/actions/workflow/status/zzf2333/TeleAPI/ci.yml?style=flat-square&label=CI" alt="CI"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-16a34a?style=flat-square" alt="License MIT"/></a>
+  <img src="https://img.shields.io/badge/python-3.12%2B-3776ab?style=flat-square" alt="Python 3.12+"/>
+  <img src="https://img.shields.io/badge/react-19-61dafb?style=flat-square" alt="React 19"/>
+</p>
 
-- Telegram 用户账号登录（QR 扫码 / 手机号验证码）
-- 多频道配置与历史消息同步
-- 新消息实时监听
-- REST API 查询频道和消息
-- Webhook 推送（HMAC-SHA256 签名 + 失败重试）
-- 关键词 / 正则过滤引擎
-- 轻量后台管理界面
-- Docker 一键部署
+</div>
 
-## Quick Start
+---
+
+TeleAPI 是一个轻量级 Telegram 频道 API 网关。它以用户账号连接 Telegram，将你已订阅的频道内容同步、结构化、存储，并转换为可被外部系统调用的 REST API 和 Webhook 数据源。
+
+---
+
+## 它能做什么
+
+| 能力 | 说明 |
+|------|------|
+| **多方式登录** | QR 扫码 / 手机号验证码 / 2FA 云密码 |
+| **频道同步** | 多频道配置，支持增量与全量历史同步 |
+| **实时监听** | 新消息自动入库，毫秒级延迟 |
+| **REST API** | 频道列表、消息查询（游标分页、关键词/类型/时间过滤） |
+| **Webhook 推送** | HMAC-SHA256 签名、指数退避重试、推送日志 |
+| **过滤引擎** | 关键词 / 正则 / 频道 / 消息类型，多维度组合 |
+| **管理界面** | React + Tailwind 轻量后台，全中文 |
+| **一键部署** | Docker Compose，多阶段构建 |
+
+---
+
+## 快速开始
 
 ### 1. 获取 Telegram API 凭证
 
-前往 [https://my.telegram.org](https://my.telegram.org) 创建应用，获取 `api_id` 和 `api_hash`。
+前往 [my.telegram.org](https://my.telegram.org) 创建应用，获取 `api_id` 和 `api_hash`。
 
 ### 2. 配置
 
@@ -30,7 +49,7 @@ cp config.example.yaml config.yaml
 编辑 `config.yaml`，填入：
 
 - `telegram.api_id` 和 `telegram.api_hash`
-- `security.admin_api_key`（至少 16 位，不可使用默认值）
+- `security.admin_api_key`（至少 16 位，不可使用弱密码）
 - 需要监听的频道列表
 
 ### 3. Docker 启动
@@ -41,59 +60,160 @@ docker compose up -d
 
 ### 4. 登录
 
-打开 `http://localhost:8080`，输入 Admin API Key，选择 QR 扫码或手机号验证码登录 Telegram。
+打开 `http://localhost:8080`，输入 Admin API Key，选择 QR 扫码或手机号验证码登录。
+
+---
 
 ## 本地开发
 
 ```bash
-# 后端
+# 安装依赖
 uv sync
-cp config.example.yaml config.yaml  # 编辑配置
-uv run uvicorn teleapi.main:app --host 0.0.0.0 --port 8080 --reload
+cp config.example.yaml config.yaml
 
-# 前端
-cd frontend
-npm install
-npm run dev
+# 一键启动前后端
+make dev
+
+# 或分别启动
+uv run uvicorn teleapi.main:app --host 0.0.0.0 --port 8080 --reload  # 后端
+cd frontend && npm install && npm run dev                              # 前端
 ```
+
+### 测试
+
+```bash
+uv run pytest tests/ -v          # 全量 222 个测试
+uv run pytest -m unit            # 仅单元测试
+uv run pytest -m api             # 仅 API 测试
+uv run ruff check src/ tests/    # Lint
+```
+
+---
 
 ## API
 
-启动后访问 `http://localhost:8080/api/docs` 查看 OpenAPI 文档。
+启动后访问 `http://localhost:8080/api/docs` 查看交互式 OpenAPI 文档。
 
-### 主要端点
+### 端点一览
 
-| 方法 | 路径                          | 说明                       |
-| ---- | ----------------------------- | -------------------------- |
-| GET  | `/health`                     | 健康检查（无需鉴权）       |
-| GET  | `/api/channels`               | 频道列表                   |
-| GET  | `/api/channels/{id}/messages` | 频道消息（支持分页、搜索） |
-| POST | `/api/channels/{id}/sync`     | 触发历史同步               |
-| GET  | `/api/sync-jobs`              | 同步任务列表               |
-| GET  | `/api/webhook-deliveries`     | Webhook 推送日志           |
-| GET  | `/api/system/status`          | 系统状态                   |
-| GET  | `/api/system/config-check`    | 配置检查                   |
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/health` | 健康检查（无需鉴权） |
+| POST | `/api/auth/qr-login` | QR 扫码登录 |
+| POST | `/api/auth/phone-login/send-code` | 手机号验证码登录 |
+| GET | `/api/auth/status` | 登录状态 |
+| GET | `/api/channels` | 频道列表 |
+| GET | `/api/channels/{id}/messages` | 频道消息（分页、搜索） |
+| POST | `/api/channels/{id}/sync` | 触发历史同步 |
+| GET | `/api/sync-jobs` | 同步任务列表 |
+| GET | `/api/webhook-deliveries` | Webhook 推送日志 |
+| GET | `/api/system/status` | 系统状态 |
+| GET | `/api/system/config-check` | 配置检查 |
 
 ### 鉴权
 
 除 `/health` 外，所有 API 需要携带密钥：
 
 ```
-Authorization: Bearer your_admin_api_key
+Authorization: Bearer <your_admin_api_key>
 ```
 
 或：
 
 ```
-X-TeleAPI-Key: your_admin_api_key
+X-TeleAPI-Key: <your_admin_api_key>
 ```
+
+---
+
+## Webhook
+
+TeleAPI 在新消息到达时向配置的 URL 推送事件，支持：
+
+- **HMAC-SHA256 签名** — `X-TeleAPI-Signature` + `X-TeleAPI-Timestamp` 头
+- **失败重试** — 可配置重试次数和退避间隔
+- **过滤器** — 只推送匹配规则的消息
+- **推送日志** — 所有投递记录可通过 API 查询
+
+```yaml
+# config.yaml 示例
+outputs:
+  webhooks:
+    - name: "my-webhook"
+      url: "https://example.com/webhook"
+      secret: "your_webhook_secret"
+      events: ["message.created"]
+      channels: ["target_channel"]
+      filters: ["important-only"]
+      retry:
+        max_attempts: 3
+        backoff_seconds: [5, 30, 120]
+```
+
+---
 
 ## 技术栈
 
-- Python / FastAPI / Telethon / SQLModel / SQLite
-- React / Vite / Tailwind CSS
-- Docker Compose
+| 层级 | 技术 |
+|------|------|
+| 语言 | Python 3.12+ |
+| 包管理 | uv |
+| API 框架 | FastAPI (async) |
+| Telegram | Telethon (MTProto 用户账号) |
+| ORM | SQLModel (Pydantic + SQLAlchemy) |
+| 数据库 | SQLite + aiosqlite |
+| 前端 | React 19 + Vite + Tailwind CSS |
+| 部署 | Docker Compose (多阶段构建) |
+| 测试 | pytest + pytest-asyncio (222 cases) |
+| CI | GitHub Actions |
+
+---
+
+## 项目结构
+
+```
+src/teleapi/
+├── main.py              # FastAPI 应用入口 + 生命周期
+├── config.py            # YAML 配置 + Pydantic 校验
+├── auth.py              # API Key 鉴权
+├── database.py          # 数据库引擎 + 会话管理
+├── models/              # SQLModel 数据模型
+├── api/                 # REST API 路由
+│   ├── auth_routes.py   # 登录（QR / 手机号 / 2FA）
+│   ├── channels.py      # 频道
+│   ├── messages.py      # 消息（游标分页）
+│   ├── sync.py          # 同步任务
+│   ├── webhooks.py      # Webhook 日志
+│   └── system.py        # 系统状态
+├── telegram/            # Telegram 集成
+│   ├── client.py        # 客户端管理
+│   ├── login.py         # 登录状态机
+│   ├── channel_manager.py
+│   ├── sync.py          # 历史同步
+│   ├── listener.py      # 实时监听
+│   └── normalizer.py    # 消息标准化
+└── services/            # 业务服务
+    ├── event.py         # 事件总线
+    ├── filter.py        # 过滤引擎
+    └── webhook.py       # Webhook 推送
+```
+
+---
+
+## 环境变量
+
+支持通过环境变量覆盖配置文件中的敏感字段：
+
+| 变量 | 覆盖字段 |
+|------|----------|
+| `TELEAPI_TELEGRAM_API_ID` | `telegram.api_id` |
+| `TELEAPI_TELEGRAM_API_HASH` | `telegram.api_hash` |
+| `TELEAPI_SECURITY_ADMIN_API_KEY` | `security.admin_api_key` |
+| `TELEAPI_DATABASE_URL` | `database.url` |
+| `TELEAPI_CONFIG` | 配置文件路径（默认 `config.yaml`） |
+
+---
 
 ## License
 
-MIT
+[MIT](LICENSE)

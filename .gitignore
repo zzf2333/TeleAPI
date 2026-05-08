@@ -18,3 +18,5 @@ frontend/dist/
 *.db
 *.db-journal
 *.db-wal
+docs/prd.md
+docs/architecture.md
