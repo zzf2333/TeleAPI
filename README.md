@@ -82,25 +82,9 @@ uv sync && make dev
 
 ### 架构
 
-```
-┌─────────────────────────────────────┐
-│          Docker Container           │
-│                                     │
-│  ┌──────────┐    ┌──────────────┐   │
-│  │ Frontend │    │   FastAPI    │   │
-│  │ (静态)   │────│   Backend    │   │     ┌──────────┐
-│  └──────────┘    │              │───│────▶│ Telegram  │
-│                  │  ┌────────┐  │   │     │  MTProto  │
-│                  │  │ SQLite │  │   │     └──────────┘
-│                  │  └────────┘  │   │
-│                  └──────────────┘   │
-│         :8080                       │
-└─────────────────────────────────────┘
-      ▲               ▲
-      │               │
-  config.yaml     data/ (持久化)
-  (只读挂载)      (session + db)
-```
+<p align="center">
+  <img src="assets/architecture.png" alt="TeleAPI Architecture" width="800"/>
+</p>
 
 ### 启动
 
@@ -258,54 +242,6 @@ outputs:
       retry:
         max_attempts: 3
         backoff_seconds: [5, 30, 120]
-```
-
----
-
-## 技术栈
-
-| 层级 | 技术 |
-|------|------|
-| 语言 | Python 3.12+ |
-| 包管理 | uv |
-| API 框架 | FastAPI (async) |
-| Telegram | Telethon (MTProto 用户账号) |
-| ORM | SQLModel (Pydantic + SQLAlchemy) |
-| 数据库 | SQLite + aiosqlite |
-| 前端 | React 19 + Vite + Tailwind CSS |
-| 部署 | Docker Compose (多阶段构建) |
-| 测试 | pytest + pytest-asyncio (222 cases) |
-| CI | GitHub Actions |
-
----
-
-## 项目结构
-
-```
-src/teleapi/
-├── main.py              # FastAPI 应用入口 + 生命周期
-├── config.py            # YAML 配置 + Pydantic 校验
-├── auth.py              # API Key 鉴权
-├── database.py          # 数据库引擎 + 会话管理
-├── models/              # SQLModel 数据模型
-├── api/                 # REST API 路由
-│   ├── auth_routes.py   # 登录（QR / 手机号 / 2FA）
-│   ├── channels.py      # 频道
-│   ├── messages.py      # 消息（游标分页）
-│   ├── sync.py          # 同步任务
-│   ├── webhooks.py      # Webhook 日志
-│   └── system.py        # 系统状态
-├── telegram/            # Telegram 集成
-│   ├── client.py        # 客户端管理
-│   ├── login.py         # 登录状态机
-│   ├── channel_manager.py
-│   ├── sync.py          # 历史同步
-│   ├── listener.py      # 实时监听
-│   └── normalizer.py    # 消息标准化
-└── services/            # 业务服务
-    ├── event.py         # 事件总线
-    ├── filter.py        # 过滤引擎
-    └── webhook.py       # Webhook 推送
 ```
 
 ---

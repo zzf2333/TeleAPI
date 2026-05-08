@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 700" width="960" height="700">
+  <style>
+    text { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  </style>
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/>
+    </marker>
+    <marker id="arrow-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+    </marker>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <rect width="960" height="700" fill="#ffffff"/>
+  <text x="480" y="36" text-anchor="middle" fill="#111827" font-size="18" font-weight="600">TeleAPI Architecture</text>
+  <!-- Client Layer -->
+  <rect x="340" y="56" width="280" height="64" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5" filter="url(#shadow)"/>
+  <circle cx="356" cy="72" r="4" fill="#f87171"/>
+  <circle cx="368" cy="72" r="4" fill="#fbbf24"/>
+  <circle cx="380" cy="72" r="4" fill="#34d399"/>
+  <text x="480" y="84" text-anchor="middle" fill="#111827" font-size="14" font-weight="600">Browser</text>
+  <text x="480" y="104" text-anchor="middle" fill="#6b7280" font-size="12">React + Tailwind CSS</text>
+  <line x1="480" y1="120" x2="480" y2="160" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <rect x="448" y="132" width="64" height="16" rx="3" fill="#ffffff" opacity="0.95"/>
+  <text x="480" y="144" text-anchor="middle" fill="#2563eb" font-size="11">:8080</text>
+  <!-- Docker Container -->
+  <rect x="60" y="165" width="840" height="420" rx="12" fill="none" stroke="#d1d5db" stroke-width="2" stroke-dasharray="8,4"/>
+  <rect x="72" y="155" width="140" height="20" rx="4" fill="#ffffff"/>
+  <text x="142" y="169" text-anchor="middle" fill="#6b7280" font-size="12" font-weight="600">Docker Container</text>
+  <!-- FastAPI Backend -->
+  <rect x="120" y="195" width="720" height="140" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="480" y="218" text-anchor="middle" fill="#111827" font-size="15" font-weight="600">FastAPI Backend</text>
+  <rect x="145" y="232" width="320" height="88" rx="6" fill="#f0fdf4" stroke="#86efac" stroke-width="1"/>
+  <text x="305" y="252" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">REST API</text>
+  <text x="305" y="270" text-anchor="middle" fill="#6b7280" font-size="11">Channels / Messages</text>
+  <text x="305" y="286" text-anchor="middle" fill="#6b7280" font-size="11">Sync Jobs / System Status</text>
+  <text x="305" y="302" text-anchor="middle" fill="#6b7280" font-size="11">Cursor Pagination + Filters</text>
+  <rect x="495" y="232" width="320" height="88" rx="6" fill="#fff7ed" stroke="#fdba74" stroke-width="1"/>
+  <text x="655" y="252" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">Webhook Engine</text>
+  <text x="655" y="270" text-anchor="middle" fill="#6b7280" font-size="11">HMAC-SHA256 Signature</text>
+  <text x="655" y="286" text-anchor="middle" fill="#6b7280" font-size="11">Exponential Backoff Retry</text>
+  <text x="655" y="302" text-anchor="middle" fill="#6b7280" font-size="11">Filter Engine + Delivery Log</text>
+  <!-- SQLite Database (cylinder) -->
+  <ellipse cx="280" cy="405" rx="100" ry="18" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <rect x="180" y="405" width="200" height="65" fill="#eff6ff" stroke="none"/>
+  <line x1="180" y1="405" x2="180" y2="470" stroke="#bfdbfe" stroke-width="1.5"/>
+  <line x1="380" y1="405" x2="380" y2="470" stroke="#bfdbfe" stroke-width="1.5"/>
+  <ellipse cx="280" cy="470" rx="100" ry="18" fill="#dbeafe" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="280" y="434" text-anchor="middle" fill="#111827" font-size="14" font-weight="600">SQLite</text>
+  <text x="280" y="452" text-anchor="middle" fill="#6b7280" font-size="11">Channels / Messages</text>
+  <text x="280" y="466" text-anchor="middle" fill="#6b7280" font-size="11">SyncJobs / WebhookLogs</text>
+  <!-- Telegram MTProto -->
+  <rect x="520" y="385" width="300" height="110" rx="8" fill="#faf5ff" stroke="#c4b5fd" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="670" y="410" text-anchor="middle" fill="#111827" font-size="14" font-weight="600">Telegram MTProto</text>
+  <text x="670" y="428" text-anchor="middle" fill="#6b7280" font-size="12">Telethon (User Account)</text>
+  <rect x="540" y="440" width="120" height="36" rx="5" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.8"/>
+  <text x="600" y="462" text-anchor="middle" fill="#111827" font-size="11">Login State Machine</text>
+  <rect x="672" y="440" width="60" height="36" rx="5" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.8"/>
+  <text x="702" y="462" text-anchor="middle" fill="#111827" font-size="11">Sync</text>
+  <rect x="744" y="440" width="60" height="36" rx="5" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.8"/>
+  <text x="774" y="462" text-anchor="middle" fill="#111827" font-size="11">Listener</text>
+  <!-- Arrows -->
+  <path d="M 305,335 L 305,387" stroke="#16a34a" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)"/>
+  <rect x="275" y="352" width="60" height="16" rx="3" fill="#ffffff" opacity="0.95"/>
+  <text x="305" y="364" text-anchor="middle" fill="#16a34a" font-size="11">R/W</text>
+  <path d="M 655,335 L 655,377" stroke="#9333ea" stroke-width="1.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <rect x="621" y="348" width="68" height="16" rx="3" fill="#ffffff" opacity="0.95"/>
+  <text x="655" y="360" text-anchor="middle" fill="#9333ea" font-size="11">MTProto</text>
+  <path d="M 520,460 L 380,460" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
+  <rect x="418" y="448" width="78" height="16" rx="3" fill="#ffffff" opacity="0.95"/>
+  <text x="457" y="460" text-anchor="middle" fill="#16a34a" font-size="11">Sync Data</text>
+  <!-- External: config.yaml -->
+  <rect x="80" y="610" width="160" height="52" rx="6" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <path d="M 108,621 L 108,647 L 132,647 L 132,627 L 126,621 Z" fill="none" stroke="#6b7280" stroke-width="1"/>
+  <path d="M 126,621 L 126,627 L 132,627" fill="none" stroke="#6b7280" stroke-width="1"/>
+  <text x="158" y="633" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">config.yaml</text>
+  <text x="160" y="650" text-anchor="middle" fill="#6b7280" font-size="11">Read-only Mount</text>
+  <!-- External: data/ -->
+  <rect x="300" y="610" width="160" height="52" rx="6" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <path d="M 328,621 L 328,647 L 352,647 L 352,627 L 346,621 Z" fill="none" stroke="#6b7280" stroke-width="1"/>
+  <path d="M 346,621 L 346,627 L 352,627" fill="none" stroke="#6b7280" stroke-width="1"/>
+  <text x="378" y="633" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">data/</text>
+  <text x="380" y="650" text-anchor="middle" fill="#6b7280" font-size="11">session.key + teleapi.db</text>
+  <path d="M 160,610 L 160,585" stroke="#6b7280" stroke-width="1.5" fill="none" stroke-dasharray="4,2" marker-end="url(#arrow-gray)"/>
+  <path d="M 380,610 L 380,585" stroke="#6b7280" stroke-width="1.5" fill="none" stroke-dasharray="4,2" marker-end="url(#arrow-gray)"/>
+  <!-- External Webhook Target -->
+  <rect x="740" y="610" width="160" height="52" rx="6" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+  <text x="820" y="633" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">Webhook Target</text>
+  <text x="820" y="650" text-anchor="middle" fill="#6b7280" font-size="11">External HTTP Endpoint</text>
+  <path d="M 820,335 L 820,585 L 820,602" stroke="#ea580c" stroke-width="1.5" fill="none" marker-end="url(#arrow-orange)"/>
+  <rect x="789" y="540" width="62" height="16" rx="3" fill="#ffffff" opacity="0.95"/>
+  <text x="820" y="552" text-anchor="middle" fill="#ea580c" font-size="11">POST</text>
+  <!-- Telegram Cloud -->
+  <path d="M 825,56 C 805,36 765,36 755,56 C 735,46 715,56 720,76 C 700,76 700,96 720,96 L 870,96 C 890,96 890,76 870,76 C 880,56 855,36 825,56 Z" fill="#faf5ff" stroke="#c4b5fd" stroke-width="1.5"/>
+  <text x="795" y="82" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">Telegram</text>
+  <path d="M 770,385 L 795,104" stroke="#9333ea" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arrow-blue)"/>
+  <!-- Legend -->
+  <g transform="translate(520, 618)">
+    <line x1="0" y1="8" x2="30" y2="8" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+    <text x="36" y="12" fill="#6b7280" font-size="11">HTTP Request</text>
+    <line x1="0" y1="26" x2="30" y2="26" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+    <text x="36" y="30" fill="#6b7280" font-size="11">Data R/W</text>
+    <line x1="130" y1="8" x2="160" y2="8" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arrow-orange)"/>
+    <text x="166" y="12" fill="#6b7280" font-size="11">Webhook</text>
+    <line x1="130" y1="26" x2="160" y2="26" stroke="#9333ea" stroke-width="1.5" stroke-dasharray="5,3"/>
+    <text x="166" y="30" fill="#6b7280" font-size="11">MTProto</text>
+  </g>
+</svg>
