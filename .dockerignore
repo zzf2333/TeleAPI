@@ -1,0 +1,14 @@
+.git
+.venv
+__pycache__
+*.pyc
+data/
+.env
+.env.*
+*.session
+node_modules
+frontend/dist
+.ruff_cache
+.pytest_cache
+.mypy_cache
+.claude

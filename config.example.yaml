@@ -1,0 +1,67 @@
+app:
+    name: "TeleAPI"
+    host: "0.0.0.0"
+    port: 8080
+    log_level: "info"
+
+telegram:
+    api_id: 123456
+    api_hash: "your_api_hash"
+    session_name: "teleapi"
+    channels:
+        - username: "example_channel"
+          enabled: true
+          sync_history: true
+          history_limit: 1000
+          filters:
+              - "crypto-important"
+
+        - username: "another_channel"
+          enabled: true
+          sync_history: false
+
+filters:
+    - name: "crypto-important"
+      include_keywords:
+          - "BTC"
+          - "ETH"
+          - "ETF"
+      exclude_keywords:
+          - "广告"
+          - "推广"
+      regex: []
+      message_types:
+          - "text"
+          - "photo"
+
+security:
+    admin_api_key: "your_admin_api_key"
+    allow_health_without_auth: true
+
+outputs:
+    api:
+        enabled: true
+
+    websocket:
+        enabled: true
+
+    webhooks:
+        - name: "research-system"
+          url: "https://example.com/webhook/telegram"
+          secret: "your_webhook_secret"
+          enabled: true
+          events:
+              - "message.created"
+          channels:
+              - "example_channel"
+          filters:
+              - "crypto-important"
+          retry:
+              max_attempts: 3
+              backoff_seconds:
+                  - 5
+                  - 30
+                  - 120
+
+database:
+    url: "sqlite+aiosqlite:///./data/teleapi.db"
