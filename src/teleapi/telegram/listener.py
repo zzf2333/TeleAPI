@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 
 from telethon import TelegramClient, events
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from teleapi.models.channel import Channel

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from sqlmodel import select
 
-from teleapi.models.sync_job import SyncJob
 
 
 pytestmark = pytest.mark.api

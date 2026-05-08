@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel, text
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import text
 
 from teleapi.database import init_engine, init_db, get_session, close_db
 import teleapi.database as _db

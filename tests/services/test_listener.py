@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from sqlmodel import select
 
-from teleapi.models.channel import Channel
 from teleapi.models.message import Message
 from teleapi.services.event import EventDispatcher
 from teleapi.telegram.listener import RealtimeListener

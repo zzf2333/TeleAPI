@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from teleapi.telegram.client import TelegramClientManager, SESSION_FILE
+from teleapi.telegram.client import TelegramClientManager
 
 
 pytestmark = pytest.mark.service

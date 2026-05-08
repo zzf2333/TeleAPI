@@ -22,7 +22,7 @@ async def system_status(request: Request, session: AsyncSession = Depends(get_se
     authorized = await cm.is_authorized()
     user_info = await cm.get_me() if authorized else None
 
-    channel_count = (await session.execute(select(func.count(Channel.id)).where(Channel.enabled == True))).scalar() or 0
+    channel_count = (await session.execute(select(func.count(Channel.id)).where(Channel.enabled.is_(True)))).scalar() or 0
     message_count = (await session.execute(select(func.count(Message.id)))).scalar() or 0
 
     last_msg = (await session.execute(select(Message.date).order_by(Message.date.desc()).limit(1))).scalar()

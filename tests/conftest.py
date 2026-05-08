@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime, timezone, timedelta
-from unittest.mock import AsyncMock, MagicMock, PropertyMock
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
@@ -16,7 +15,6 @@ from teleapi.config import TeleAPIConfig
 from teleapi.models.channel import Channel
 from teleapi.models.message import Message
 from teleapi.models.sync_job import SyncJob
-from teleapi.models.webhook_delivery import WebhookDelivery
 
 TEST_API_KEY = "test_secure_key_for_testing_1234"
 

@@ -34,7 +34,4 @@ class TestChannelsAPI:
 
     async def test_get_not_found(self, client):
         resp = await client.get("/api/channels/nonexistent")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert isinstance(data, list)
-        assert data[0] == {"error": "Channel not found"}
+        assert resp.status_code == 404

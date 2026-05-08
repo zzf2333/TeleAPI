@@ -4,8 +4,6 @@ import asyncio
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlmodel import select
 from telethon import TelegramClient
 from telethon.errors import FloodWaitError, ChannelPrivateError

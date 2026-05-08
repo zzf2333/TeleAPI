@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import func, select
 
@@ -44,7 +45,7 @@ async def get_channel(channel_id: str, session: AsyncSession = Depends(get_sessi
     stmt = select(Channel).where((Channel.id == channel_id) | (Channel.username == channel_id))
     channel = (await session.execute(stmt)).scalar_one_or_none()
     if not channel:
-        return {"error": "Channel not found"}, 404
+        return JSONResponse({"error": "Channel not found"}, status_code=404)
 
     count_stmt = select(func.count(Message.id)).where(Message.channel_id == channel.id)
     message_count = (await session.execute(count_stmt)).scalar() or 0

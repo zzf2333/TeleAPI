@@ -8,7 +8,6 @@ import logging
 import time
 
 import httpx
-from sqlmodel import select
 
 from teleapi.config import WebhookConfig
 from teleapi.models.webhook_delivery import WebhookDelivery

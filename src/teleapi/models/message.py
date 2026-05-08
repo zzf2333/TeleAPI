@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from uuid import uuid4
 
-from sqlmodel import Column, Field, SQLModel, String, Text, UniqueConstraint
+from sqlmodel import Column, Field, SQLModel, Text, UniqueConstraint
 
 
 class Message(SQLModel, table=True):

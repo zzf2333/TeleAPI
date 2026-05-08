@@ -3,11 +3,9 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from teleapi.config import TelegramChannelConfig
 from teleapi.telegram.channel_manager import ChannelManager
-from teleapi.models.channel import Channel
 
 
 pytestmark = pytest.mark.service
