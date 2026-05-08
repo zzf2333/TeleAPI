@@ -59,7 +59,7 @@ npm run dev
 
 ## API
 
-启动后访问 `http://localhost:8080/docs` 查看 OpenAPI 文档。
+启动后访问 `http://localhost:8080/api/docs` 查看 OpenAPI 文档。
 
 ### 主要端点
 
