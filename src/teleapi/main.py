@@ -12,9 +12,9 @@ from fastapi.staticfiles import StaticFiles
 from teleapi import __version__
 from teleapi.config import TeleAPIConfig, load_config
 from teleapi.database import close_db, init_db, init_engine
-from teleapi.database import _async_session_factory
+from teleapi import database as _db
 from teleapi.telegram.client import TelegramClientManager
-from teleapi.telegram.login import QRLoginService
+from teleapi.telegram.login import QRLoginService, PhoneLoginService
 from teleapi.telegram.channel_manager import ChannelManager
 from teleapi.telegram.sync import HistorySyncService
 from teleapi.telegram.listener import RealtimeListener
@@ -61,16 +61,17 @@ async def lifespan(app: FastAPI):
     await telegram_client.connect()
 
     channel_manager = ChannelManager(telegram_client.client)
-    sync_service = HistorySyncService(telegram_client.client, _async_session_factory)
+    sync_service = HistorySyncService(telegram_client.client, _db._async_session_factory)
     event_dispatcher = EventDispatcher()
     filter_engine = FilterEngine(config.filters)
-    webhook_dispatcher = WebhookDispatcher(config.outputs.webhooks, filter_engine, _async_session_factory)
+    webhook_dispatcher = WebhookDispatcher(config.outputs.webhooks, filter_engine, _db._async_session_factory)
     event_dispatcher.subscribe("message.created", webhook_dispatcher.on_message_created)
-    listener = RealtimeListener(telegram_client.client, _async_session_factory, event_dispatcher)
+    listener = RealtimeListener(telegram_client.client, _db._async_session_factory, event_dispatcher)
 
     app.state.config = config
     app.state.telegram_client = telegram_client
     app.state.login_service = QRLoginService(telegram_client)
+    app.state.phone_login_service = PhoneLoginService(telegram_client)
     app.state.channel_manager = channel_manager
     app.state.sync_service = sync_service
     app.state.event_dispatcher = event_dispatcher
@@ -79,12 +80,12 @@ async def lifespan(app: FastAPI):
 
     if await telegram_client.is_authorized() and config.telegram.channels:
         import asyncio
-        async with _async_session_factory() as session:
+        async with _db._async_session_factory() as session:
             channels = await channel_manager.resolve_channels(config.telegram.channels, session)
         for ch, cfg in zip(channels, [c for c in config.telegram.channels if c.enabled]):
             if cfg.sync_history:
                 from teleapi.models.sync_job import SyncJob
-                async with _async_session_factory() as session:
+                async with _db._async_session_factory() as session:
                     job = SyncJob(channel_id=ch.id, total=cfg.history_limit)
                     session.add(job)
                     await session.commit()

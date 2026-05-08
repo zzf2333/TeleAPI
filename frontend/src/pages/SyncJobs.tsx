@@ -29,17 +29,17 @@ export default function SyncJobs() {
 
     return (
         <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Sync Jobs</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">同步任务</h2>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Job ID</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
-                            <th className="text-right px-4 py-3 font-medium text-gray-500">Progress</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Error</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Started</th>
-                            <th className="text-left px-4 py-3 font-medium text-gray-500">Finished</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">任务 ID</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">状态</th>
+                            <th className="text-right px-4 py-3 font-medium text-gray-500">进度</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">错误</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">开始时间</th>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">完成时间</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -66,7 +66,7 @@ export default function SyncJobs() {
                         {jobs.length === 0 && (
                             <tr>
                                 <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                                    No sync jobs
+                                    暂无同步任务
                                 </td>
                             </tr>
                         )}

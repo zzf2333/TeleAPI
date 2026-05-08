@@ -29,13 +29,13 @@ src/teleapi/
 │   └── webhook_delivery.py  # Webhook 推送记录
 ├── telegram/            # Telegram 相关
 │   ├── client.py        # TelegramClientManager (StringSession 持久化)
-│   ├── login.py         # QR 扫码登录流程
+│   ├── login.py         # 登录流程 (QR 扫码 + 手机号验证码)
 │   ├── channel_manager.py   # 频道解析 + DB upsert
 │   ├── normalizer.py    # 消息结构化 (Telethon → 统一格式)
 │   ├── sync.py          # 历史消息同步 (断点续传/FloodWait)
 │   └── listener.py      # 实时新消息监听
 ├── api/                 # REST API 端点
-│   ├── auth_routes.py   # /api/auth/* (QR 登录/状态/登出)
+│   ├── auth_routes.py   # /api/auth/* (QR 登录/手机号登录/2FA/登出)
 │   ├── channels.py      # /api/channels
 │   ├── messages.py      # /api/messages (游标分页)
 │   ├── sync.py          # /api/sync-jobs

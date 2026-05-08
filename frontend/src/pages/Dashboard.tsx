@@ -31,54 +31,55 @@ export default function Dashboard() {
         api<SystemStatus>('/api/system/status').then(setStatus);
     }, []);
 
-    if (!status) return <p className="text-gray-500">Loading...</p>;
+    if (!status) return <p className="text-gray-500">加载中...</p>;
 
     return (
         <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">System Status</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">系统状态</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Card title="Telegram">
                     <p className="text-lg font-semibold">
                         {status.telegram.connected ? (
-                            <span className="text-green-600">Connected</span>
+                            <span className="text-green-600">已连接</span>
                         ) : (
-                            <span className="text-red-500">Disconnected</span>
+                            <span className="text-red-500">未连接</span>
                         )}
                     </p>
                     {status.telegram.user && (
                         <p className="text-sm text-gray-600">
-                            {status.telegram.user.first_name} (@{status.telegram.user.username})
+                            {status.telegram.user.first_name}
+                            {status.telegram.user.username && ` (@${status.telegram.user.username})`}
                         </p>
                     )}
                 </Card>
 
-                <Card title="Channels">
+                <Card title="频道">
                     <p className="text-2xl font-bold text-gray-900">{status.channels.enabled_count}</p>
-                    <p className="text-sm text-gray-500">enabled</p>
+                    <p className="text-sm text-gray-500">已启用</p>
                 </Card>
 
-                <Card title="Messages">
+                <Card title="消息">
                     <p className="text-2xl font-bold text-gray-900">{status.messages.total_count}</p>
                     <p className="text-sm text-gray-500">
                         {status.messages.last_received_at
-                            ? `Last: ${new Date(status.messages.last_received_at).toLocaleString()}`
-                            : 'No messages yet'}
+                            ? `最近: ${new Date(status.messages.last_received_at).toLocaleString()}`
+                            : '暂无消息'}
                     </p>
                 </Card>
 
-                <Card title="Database">
+                <Card title="数据库">
                     <p className="text-2xl font-bold text-gray-900">{formatBytes(status.database.size_bytes)}</p>
                 </Card>
 
-                <Card title="Webhooks">
+                <Card title="Webhook">
                     <div className="flex gap-4">
                         <div>
                             <p className="text-lg font-bold text-green-600">{status.webhooks.success_count}</p>
-                            <p className="text-xs text-gray-500">success</p>
+                            <p className="text-xs text-gray-500">成功</p>
                         </div>
                         <div>
                             <p className="text-lg font-bold text-red-500">{status.webhooks.failed_count}</p>
-                            <p className="text-xs text-gray-500">failed</p>
+                            <p className="text-xs text-gray-500">失败</p>
                         </div>
                     </div>
                 </Card>

@@ -19,15 +19,15 @@ export default function ConfigCheck() {
         api<ConfigCheckResponse>('/api/system/config-check').then(setData);
     }, []);
 
-    if (!data) return <p className="text-gray-500">Loading...</p>;
+    if (!data) return <p className="text-gray-500">加载中...</p>;
 
     return (
         <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Configuration Check</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">配置检查</h2>
 
             <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
                 <p className={`text-lg font-semibold ${data.all_ok ? 'text-green-600' : 'text-amber-600'}`}>
-                    {data.all_ok ? 'All checks passed' : 'Some checks failed'}
+                    {data.all_ok ? '所有检查通过' : '部分检查未通过'}
                 </p>
             </div>
 
