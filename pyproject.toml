@@ -41,3 +41,10 @@ indent-width = 4
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+    "unit: 纯逻辑测试",
+    "db: 内存数据库测试",
+    "service: 服务层测试（mock 外部依赖）",
+    "api: API 路由测试",
+    "e2e: 端到端流程测试",
+]
