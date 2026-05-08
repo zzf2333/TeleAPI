@@ -25,6 +25,7 @@ export default function Channels() {
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
+                            <th className="text-left px-4 py-3 font-medium text-gray-500">频道 ID</th>
                             <th className="text-left px-4 py-3 font-medium text-gray-500">用户名</th>
                             <th className="text-left px-4 py-3 font-medium text-gray-500">标题</th>
                             <th className="text-left px-4 py-3 font-medium text-gray-500">状态</th>
@@ -35,6 +36,7 @@ export default function Channels() {
                     <tbody className="divide-y divide-gray-100">
                         {channels.map((ch) => (
                             <tr key={ch.id} className="hover:bg-gray-50">
+                                <td className="px-4 py-3 font-mono text-xs text-gray-500">{ch.telegram_id}</td>
                                 <td className="px-4 py-3 font-mono text-blue-600">@{ch.username}</td>
                                 <td className="px-4 py-3">{ch.title}</td>
                                 <td className="px-4 py-3">
@@ -52,7 +54,7 @@ export default function Channels() {
                         ))}
                         {channels.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                                     暂无频道
                                 </td>
                             </tr>
