@@ -15,6 +15,7 @@ from teleapi.database import close_db, init_db, init_engine
 from teleapi import database as _db
 from teleapi.telegram.client import TelegramClientManager
 from teleapi.telegram.login import QRLoginService, PhoneLoginService
+from teleapi.models.channel import Channel
 from teleapi.telegram.channel_manager import ChannelManager
 from teleapi.telegram.sync import HistorySyncService
 from teleapi.telegram.listener import RealtimeListener
@@ -78,25 +79,42 @@ async def lifespan(app: FastAPI):
     app.state.listener = listener
     logger.info("TeleAPI v%s started", __version__)
 
-    if await telegram_client.is_authorized() and config.telegram.channels:
+    if await telegram_client.is_authorized():
         import asyncio
-        async with _db._async_session_factory() as session:
-            channels = await channel_manager.resolve_channels(config.telegram.channels, session)
-        for ch, cfg in zip(channels, [c for c in config.telegram.channels if c.enabled]):
-            if cfg.sync_history:
-                from teleapi.models.sync_job import SyncJob
-                async with _db._async_session_factory() as session:
-                    job = SyncJob(channel_id=ch.id, total=cfg.history_limit)
-                    session.add(job)
-                    await session.commit()
-                    await session.refresh(job)
-                entity = channel_manager.get_entity(cfg.username)
-                asyncio.create_task(sync_service.sync_channel(ch.id, entity, job.id, cfg.history_limit))
-                logger.info("Auto-sync started for %s (job=%s)", cfg.username, job.id)
+        from teleapi.models.sync_job import SyncJob
 
-        entities = [channel_manager.get_entity(c.username) for c in config.telegram.channels if c.enabled]
-        entities = [e for e in entities if e is not None]
-        await listener.start(entities)
+        if config.telegram.channels:
+            async with _db._async_session_factory() as session:
+                channels = await channel_manager.resolve_channels(config.telegram.channels, session)
+            for ch, cfg in zip(channels, [c for c in config.telegram.channels if c.enabled]):
+                if cfg.sync_history:
+                    async with _db._async_session_factory() as session:
+                        job = SyncJob(channel_id=ch.id, total=cfg.history_limit)
+                        session.add(job)
+                        await session.commit()
+                        await session.refresh(job)
+                    entity = channel_manager.get_entity(cfg.username)
+                    asyncio.create_task(sync_service.sync_channel(ch.id, entity, job.id, cfg.history_limit))
+                    logger.info("Auto-sync started for %s (job=%s)", cfg.username, job.id)
+
+        async with _db._async_session_factory() as session:
+            from sqlmodel import select
+            all_enabled = (await session.execute(
+                select(Channel).where(Channel.enabled.is_(True))
+            )).scalars().all()
+
+            for ch in all_enabled:
+                if not channel_manager.get_entity(ch.username):
+                    try:
+                        entity = await telegram_client.client.get_entity(ch.username)
+                        channel_manager._entities[ch.username] = entity
+                        logger.info("Resolved DB channel: %s", ch.username)
+                    except Exception as e:
+                        logger.warning("Failed to resolve DB channel %s: %s", ch.username, e)
+
+        entities = channel_manager.get_all_entities()
+        if entities:
+            await listener.start(entities)
 
     yield
 

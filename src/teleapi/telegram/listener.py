@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 
 from telethon import TelegramClient, events
@@ -25,6 +26,7 @@ class RealtimeListener:
         self._session_factory = session_factory
         self._dispatcher = event_dispatcher
         self._handler = None
+        self._lock = asyncio.Lock()
 
     async def start(self, channel_entities: list):
         if not channel_entities:
@@ -93,6 +95,11 @@ class RealtimeListener:
 
         except Exception as e:
             logger.error("Error handling new message: %s", e)
+
+    async def restart(self, channel_entities: list):
+        async with self._lock:
+            await self.stop()
+            await self.start(channel_entities)
 
     async def stop(self):
         if self._handler:

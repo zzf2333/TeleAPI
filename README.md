@@ -24,7 +24,7 @@ TeleAPI 是一个轻量级 Telegram 频道 API 网关。它以用户账号连接
 | 能力 | 说明 |
 |------|------|
 | **多方式登录** | QR 扫码 / 手机号验证码 / 2FA 云密码 |
-| **频道同步** | 多频道配置，支持增量与全量历史同步 |
+| **频道管理** | 前端动态增删频道，运行时热重载，支持增量与全量历史同步 |
 | **实时监听** | 新消息自动入库，毫秒级延迟 |
 | **REST API** | 频道列表、消息查询（游标分页、关键词/类型/时间过滤） |
 | **Webhook 推送** | HMAC-SHA256 签名、指数退避重试、推送日志 |
@@ -163,7 +163,7 @@ cd frontend && npm install && npm run dev                              # 前端
 ### 常用命令
 
 ```bash
-make test          # 全量 222 个测试
+make test          # 全量 234 个测试
 make lint          # Ruff lint
 make build         # 构建前端
 make docker-build  # 构建 Docker 镜像
@@ -197,6 +197,9 @@ uv run pytest -m e2e       # 端到端
 | POST | `/api/auth/phone-login/send-code` | 手机号验证码登录 |
 | GET | `/api/auth/status` | 登录状态 |
 | GET | `/api/channels` | 频道列表 |
+| POST | `/api/channels` | 添加订阅频道 |
+| PUT | `/api/channels/{id}` | 启用 / 禁用频道 |
+| DELETE | `/api/channels/{id}` | 删除频道及关联数据 |
 | GET | `/api/channels/{id}/messages` | 频道消息（分页、搜索） |
 | POST | `/api/channels/{id}/sync` | 触发历史同步 |
 | GET | `/api/sync-jobs` | 同步任务列表 |
