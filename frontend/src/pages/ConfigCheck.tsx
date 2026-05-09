@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
+import { CircleCheck, CircleX, ShieldCheck, ShieldAlert } from 'lucide-react';
 
 interface Check {
     name: string;
@@ -19,31 +20,38 @@ export default function ConfigCheck() {
         api<ConfigCheckResponse>('/api/system/config-check').then(setData);
     }, []);
 
-    if (!data) return <p className="text-gray-500">加载中...</p>;
+    if (!data) return <p className="text-slate-500">加载中...</p>;
 
     return (
         <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">配置检查</h2>
+            <h2 className="text-xl font-bold text-slate-100 mb-4">配置检查</h2>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-                <p className={`text-lg font-semibold ${data.all_ok ? 'text-green-600' : 'text-amber-600'}`}>
-                    {data.all_ok ? '所有检查通过' : '部分检查未通过'}
-                </p>
+            <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl border border-slate-700/50 p-5 mb-4">
+                <div className="flex items-center gap-2">
+                    {data.all_ok
+                        ? <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                        : <ShieldAlert className="w-5 h-5 text-amber-400" />
+                    }
+                    <p className={`text-lg font-semibold ${data.all_ok ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        {data.all_ok ? '所有检查通过' : '部分检查未通过'}
+                    </p>
+                </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <ul className="divide-y divide-gray-100">
+            <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl border border-slate-700/50 overflow-hidden">
+                <ul className="divide-y divide-slate-700/30">
                     {data.checks.map((check) => (
-                        <li key={check.name} className="flex items-center justify-between px-4 py-3">
-                            <span className="text-sm text-gray-700">
+                        <li key={check.name} className="flex items-center justify-between px-4 py-3 hover:bg-slate-700/20 transition-colors">
+                            <span className="text-sm text-slate-300">
                                 {check.name}
                                 {check.count !== undefined && (
-                                    <span className="ml-2 text-gray-400">({check.count})</span>
+                                    <span className="ml-2 text-slate-500">({check.count})</span>
                                 )}
                             </span>
-                            <span className={`text-lg ${check.ok ? 'text-green-500' : 'text-red-500'}`}>
-                                {check.ok ? '✓' : '✗'}
-                            </span>
+                            {check.ok
+                                ? <CircleCheck className="w-5 h-5 text-emerald-400" />
+                                : <CircleX className="w-5 h-5 text-rose-400" />
+                            }
                         </li>
                     ))}
                 </ul>
