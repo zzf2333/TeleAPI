@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.1.2 (2026-05-09)
+
+### 新增
+
+- 支持通过粘贴 Telethon StringSession 字符串直接登录，跳过 QR/手机号验证流程
+- 登录页新增「Session 导入」tab
+
+## v0.1.1 (2026-05-08)
+
+### 新增
+
+- 前端深色科技风 UI 改版 — 全页面暗色主题 + 图标
+- 前端动态配置订阅频道 — 添加/启用禁用/删除
+- 仪表盘 Telegram 未连接时显示「连接」按钮
+
+### 修复
+
+- 修复 lifespan 中 select 的 UnboundLocalError
+- 启动时避免创建冗余同步任务
+- 测试隔离 SESSION_FILE 防止污染真实 session
+
+### 内部
+
+- 整理 .gitignore 分组
+- 架构图改用 fireworks-tech-graph 生成
+
 ## v0.1.0 (2025-05-08)
 
 首个公开版本。
