@@ -81,6 +81,7 @@ async def lifespan(app: FastAPI):
 
     if await telegram_client.is_authorized():
         import asyncio
+        from sqlmodel import select
         from teleapi.models.sync_job import SyncJob
 
         if config.telegram.channels:
@@ -118,7 +119,6 @@ async def lifespan(app: FastAPI):
                     logger.info("Auto-sync started for %s (job=%s)", cfg.username, job.id)
 
         async with _db._async_session_factory() as session:
-            from sqlmodel import select
             all_enabled = (await session.execute(
                 select(Channel).where(Channel.enabled.is_(True))
             )).scalars().all()
