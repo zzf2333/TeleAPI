@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { setApiKey, api } from '../api/client';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { setApiKey, getApiKey, api } from '../api/client';
 
 export default function Login() {
+    const location = useLocation();
+    const skipKey = !!(location.state as { skipKey?: boolean })?.skipKey && !!getApiKey();
+
     const [key, setKey] = useState('');
     const [error, setError] = useState('');
-    const [authed, setAuthed] = useState(false);
+    const [authed, setAuthed] = useState(skipKey);
     const navigate = useNavigate();
 
     const [loginMethod, setLoginMethod] = useState<'qr' | 'phone'>('qr');

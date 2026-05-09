@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 
 interface SystemStatus {
@@ -26,6 +27,7 @@ function formatBytes(bytes: number): string {
 
 export default function Dashboard() {
     const [status, setStatus] = useState<SystemStatus | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         api<SystemStatus>('/api/system/status').then(setStatus);
@@ -50,6 +52,14 @@ export default function Dashboard() {
                             {status.telegram.user.first_name}
                             {status.telegram.user.username && ` (@${status.telegram.user.username})`}
                         </p>
+                    )}
+                    {!status.telegram.connected && (
+                        <button
+                            onClick={() => navigate('/login', { state: { skipKey: true } })}
+                            className="mt-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            连接 Telegram
+                        </button>
                     )}
                 </Card>
 
