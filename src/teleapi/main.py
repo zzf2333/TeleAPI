@@ -87,13 +87,33 @@ async def lifespan(app: FastAPI):
             async with _db._async_session_factory() as session:
                 channels = await channel_manager.resolve_channels(config.telegram.channels, session)
             for ch, cfg in zip(channels, [c for c in config.telegram.channels if c.enabled]):
-                if cfg.sync_history:
-                    async with _db._async_session_factory() as session:
-                        job = SyncJob(channel_id=ch.id, total=cfg.history_limit)
-                        session.add(job)
-                        await session.commit()
-                        await session.refresh(job)
+                if not cfg.sync_history:
+                    continue
+                async with _db._async_session_factory() as session:
+                    recent_ok = (await session.execute(
+                        select(SyncJob)
+                        .where(SyncJob.channel_id == ch.id, SyncJob.status == "success")
+                        .order_by(SyncJob.created_at.desc())
+                        .limit(1)
+                    )).scalar_one_or_none()
+                    if recent_ok:
+                        logger.info("Skipping auto-sync for %s: recent success exists", cfg.username)
+                        continue
+
                     entity = channel_manager.get_entity(cfg.username)
+                    if entity and ch.last_message_id:
+                        has_new = False
+                        async for _ in telegram_client.client.iter_messages(entity, limit=1, min_id=ch.last_message_id):
+                            has_new = True
+                        if not has_new:
+                            logger.info("Skipping auto-sync for %s: no new messages", cfg.username)
+                            continue
+
+                    job = SyncJob(channel_id=ch.id, total=cfg.history_limit)
+                    session.add(job)
+                    await session.commit()
+                    await session.refresh(job)
+                if entity:
                     asyncio.create_task(sync_service.sync_channel(ch.id, entity, job.id, cfg.history_limit))
                     logger.info("Auto-sync started for %s (job=%s)", cfg.username, job.id)
 
