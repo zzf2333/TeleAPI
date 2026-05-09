@@ -137,6 +137,11 @@ def mock_client_manager(mock_telegram_client):
     return cm
 
 
+@pytest.fixture(autouse=True)
+def _isolate_session_file(tmp_path, monkeypatch):
+    monkeypatch.setattr("teleapi.telegram.client.SESSION_FILE", tmp_path / "session.key")
+
+
 @pytest.fixture
 def test_app(test_config, async_session_factory, mock_client_manager):
     from teleapi.api.auth_routes import router as auth_router

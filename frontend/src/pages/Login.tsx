@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { setApiKey, api } from '../api/client';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { setApiKey, getApiKey, api } from '../api/client';
+import { KeyRound, QrCode, Smartphone, ShieldCheck, FileKey } from 'lucide-react';
 
 export default function Login() {
+    const location = useLocation();
+    const skipKey = !!(location.state as { skipKey?: boolean })?.skipKey && !!getApiKey();
+
     const [key, setKey] = useState('');
     const [error, setError] = useState('');
-    const [authed, setAuthed] = useState(false);
+    const [authed, setAuthed] = useState(skipKey);
     const navigate = useNavigate();
 
-    const [loginMethod, setLoginMethod] = useState<'qr' | 'phone'>('qr');
+    const [loginMethod, setLoginMethod] = useState<'qr' | 'phone' | 'session'>('qr');
 
     const [qrImage, setQrImage] = useState('');
     const [qrStatus, setQrStatus] = useState('');
@@ -18,6 +22,9 @@ export default function Login() {
     const [phoneStatus, setPhoneStatus] = useState('');
 
     const [password, setPassword] = useState('');
+
+    const [sessionString, setSessionString] = useState('');
+    const [sessionLoading, setSessionLoading] = useState(false);
 
     async function handleKeySubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -120,59 +127,91 @@ export default function Login() {
         }
     }
 
+    async function handleSessionImport(e: React.FormEvent) {
+        e.preventDefault();
+        setError('');
+        setSessionLoading(true);
+        try {
+            const data = await api<{ status: string; error?: string }>(
+                '/api/auth/session-login',
+                { method: 'POST', body: JSON.stringify({ session_string: sessionString }) },
+            );
+            if (data.status === 'success') navigate('/');
+            else if (data.error) setError(data.error);
+        } catch (e: unknown) {
+            setError(String(e));
+        } finally {
+            setSessionLoading(false);
+        }
+    }
+
     const show2fa = qrStatus === '2fa_required' || phoneStatus === '2fa_required';
 
+    const inputClass = 'w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-colors';
+    const primaryBtn = 'w-full py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors';
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-                <h1 className="text-2xl font-bold text-gray-900 mb-6">TeleAPI</h1>
+        <div className="min-h-screen flex items-center justify-center bg-slate-950">
+            <div className="bg-slate-800/60 backdrop-blur-sm p-8 rounded-xl border border-slate-700/50 shadow-2xl shadow-cyan-500/5 w-full max-w-md">
+                <h1 className="text-2xl font-bold text-cyan-400 mb-6 tracking-wide">TeleAPI</h1>
 
                 {!authed ? (
                     <form onSubmit={handleKeySubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">管理密钥</label>
+                            <label className="text-sm font-medium text-slate-400 mb-1 flex items-center gap-1.5">
+                                <KeyRound className="w-3.5 h-3.5" />
+                                管理密钥
+                            </label>
                             <input
                                 type="password"
                                 value={key}
                                 onChange={(e) => setKey(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className={inputClass}
                                 placeholder="请输入管理密钥"
                             />
                         </div>
-                        {error && <p className="text-red-500 text-sm">{error}</p>}
-                        <button
-                            type="submit"
-                            className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                        >
-                            验证
-                        </button>
+                        {error && <p className="text-rose-400 text-sm">{error}</p>}
+                        <button type="submit" className={primaryBtn}>验证</button>
                     </form>
                 ) : (
                     <div className="space-y-4">
-                        <p className="text-green-600 text-sm">密钥验证通过</p>
+                        <p className="text-emerald-400 text-sm">密钥验证通过</p>
 
                         {!show2fa && (
                             <>
-                                <div className="flex border-b border-gray-200 mb-4">
+                                <div className="flex border-b border-slate-700/50 mb-4">
                                     <button
                                         onClick={() => { setLoginMethod('qr'); setError(''); }}
-                                        className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                        className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
                                             loginMethod === 'qr'
-                                                ? 'border-blue-600 text-blue-600'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                                                ? 'border-cyan-400 text-cyan-400'
+                                                : 'border-transparent text-slate-500 hover:text-slate-300'
                                         }`}
                                     >
+                                        <QrCode className="w-4 h-4" />
                                         扫码登录
                                     </button>
                                     <button
                                         onClick={() => { setLoginMethod('phone'); setError(''); }}
-                                        className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                        className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
                                             loginMethod === 'phone'
-                                                ? 'border-blue-600 text-blue-600'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                                                ? 'border-cyan-400 text-cyan-400'
+                                                : 'border-transparent text-slate-500 hover:text-slate-300'
                                         }`}
                                     >
+                                        <Smartphone className="w-4 h-4" />
                                         手机号登录
+                                    </button>
+                                    <button
+                                        onClick={() => { setLoginMethod('session'); setError(''); }}
+                                        className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+                                            loginMethod === 'session'
+                                                ? 'border-cyan-400 text-cyan-400'
+                                                : 'border-transparent text-slate-500 hover:text-slate-300'
+                                        }`}
+                                    >
+                                        <FileKey className="w-4 h-4" />
+                                        Session 导入
                                     </button>
                                 </div>
 
@@ -180,27 +219,22 @@ export default function Login() {
                                     <>
                                         {!qrImage && qrStatus !== '2fa_required' && (
                                             <div className="space-y-3">
-                                                <button
-                                                    onClick={startQrLogin}
-                                                    className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                                >
-                                                    生成二维码
-                                                </button>
+                                                <button onClick={startQrLogin} className={primaryBtn}>生成二维码</button>
                                             </div>
                                         )}
 
                                         {qrImage && qrStatus === 'waiting' && (
                                             <div className="text-center space-y-3">
-                                                <p className="text-sm text-gray-600">请使用 Telegram 手机客户端扫码</p>
-                                                <img src={qrImage} alt="QR Code" className="mx-auto w-48 h-48" />
-                                                <p className="text-xs text-gray-400">等待扫码...</p>
+                                                <p className="text-sm text-slate-400">请使用 Telegram 手机客户端扫码</p>
+                                                <img src={qrImage} alt="QR Code" className="mx-auto w-48 h-48 rounded-lg" />
+                                                <p className="text-xs text-slate-500">等待扫码...</p>
                                             </div>
                                         )}
 
                                         {qrStatus === 'expired' && (
                                             <div className="text-center space-y-3">
-                                                <p className="text-sm text-amber-600">二维码已过期</p>
-                                                <button onClick={refreshQr} className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                                <p className="text-sm text-amber-400">二维码已过期</p>
+                                                <button onClick={refreshQr} className="py-2 px-4 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors">
                                                     重新生成
                                                 </button>
                                             </div>
@@ -213,43 +247,36 @@ export default function Login() {
                                         {(!phoneStatus || phoneStatus === 'idle') && (
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+                                                    <label className="block text-sm font-medium text-slate-400 mb-1">手机号</label>
                                                     <input
                                                         type="tel"
                                                         value={phone}
                                                         onChange={(e) => setPhone(e.target.value)}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        className={inputClass}
                                                         placeholder="+8613800138000"
                                                     />
-                                                    <p className="text-xs text-gray-400 mt-1">请使用国际格式，以 + 开头</p>
+                                                    <p className="text-xs text-slate-500 mt-1">请使用国际格式，以 + 开头</p>
                                                 </div>
-                                                <button
-                                                    onClick={sendCode}
-                                                    className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                                >
-                                                    发送验证码
-                                                </button>
+                                                <button onClick={sendCode} className={primaryBtn}>发送验证码</button>
                                             </div>
                                         )}
 
                                         {phoneStatus === 'code_sent' && (
                                             <form onSubmit={verifyCode} className="space-y-3">
-                                                <p className="text-sm text-green-600">验证码已发送至 {phone}</p>
+                                                <p className="text-sm text-emerald-400">验证码已发送至 {phone}</p>
                                                 <input
                                                     type="text"
                                                     value={verificationCode}
                                                     onChange={(e) => setVerificationCode(e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className={inputClass}
                                                     placeholder="请输入验证码"
                                                     autoFocus
                                                 />
-                                                <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                                    验证
-                                                </button>
+                                                <button type="submit" className={primaryBtn}>验证</button>
                                                 <button
                                                     type="button"
                                                     onClick={sendCode}
-                                                    className="w-full py-1 text-sm text-blue-600 hover:text-blue-800"
+                                                    className="w-full py-1 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
                                                 >
                                                     重新发送
                                                 </button>
@@ -258,8 +285,8 @@ export default function Login() {
 
                                         {phoneStatus === 'expired' && (
                                             <div className="text-center space-y-3">
-                                                <p className="text-sm text-amber-600">验证码已过期</p>
-                                                <button onClick={sendCode} className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                                <p className="text-sm text-amber-400">验证码已过期</p>
+                                                <button onClick={sendCode} className="py-2 px-4 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors">
                                                     重新发送
                                                 </button>
                                             </div>
@@ -269,7 +296,7 @@ export default function Login() {
                                             <div className="space-y-3">
                                                 <button
                                                     onClick={() => { setPhoneStatus(''); setError(''); }}
-                                                    className="w-full py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                                                    className="w-full py-2 border border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-slate-200 transition-colors"
                                                 >
                                                     重试
                                                 </button>
@@ -278,9 +305,35 @@ export default function Login() {
                                     </>
                                 )}
 
+                                {loginMethod === 'session' && (
+                                    <form onSubmit={handleSessionImport} className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-400 mb-1">
+                                                StringSession 字符串
+                                            </label>
+                                            <textarea
+                                                value={sessionString}
+                                                onChange={(e) => setSessionString(e.target.value)}
+                                                className={inputClass + ' resize-none h-24 font-mono text-xs'}
+                                                placeholder="粘贴 Telethon StringSession 字符串..."
+                                            />
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                通过 Telethon 生成的 Session 字符串
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={!sessionString.trim() || sessionLoading}
+                                            className={primaryBtn + ((!sessionString.trim() || sessionLoading) ? ' opacity-60 cursor-not-allowed' : '')}
+                                        >
+                                            {sessionLoading ? '验证中...' : '导入 Session'}
+                                        </button>
+                                    </form>
+                                )}
+
                                 <button
                                     onClick={() => navigate('/')}
-                                    className="w-full py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                                    className="w-full py-2 border border-slate-600 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-slate-200 transition-colors"
                                 >
                                     跳过（已登录）
                                 </button>
@@ -289,21 +342,22 @@ export default function Login() {
 
                         {show2fa && (
                             <form onSubmit={handle2fa} className="space-y-3">
-                                <p className="text-sm text-amber-600">需要两步验证密码</p>
+                                <p className="text-sm text-amber-400 flex items-center gap-1.5">
+                                    <ShieldCheck className="w-4 h-4" />
+                                    需要两步验证密码
+                                </p>
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className={inputClass}
                                     placeholder="请输入两步验证密码"
                                 />
-                                <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                    提交
-                                </button>
+                                <button type="submit" className={primaryBtn}>提交</button>
                             </form>
                         )}
 
-                        {error && <p className="text-red-500 text-sm">{error}</p>}
+                        {error && <p className="text-rose-400 text-sm">{error}</p>}
                     </div>
                 )}
             </div>

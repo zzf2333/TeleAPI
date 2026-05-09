@@ -58,5 +58,44 @@ class ChannelManager:
 
         return resolved
 
+    async def resolve_single_channel(
+        self,
+        username: str,
+        session: AsyncSession,
+    ) -> Channel:
+        try:
+            entity = await self._client.get_entity(username)
+        except Exception as e:
+            raise ValueError(f"无法在 Telegram 上解析 '{username}': {e}")
+
+        self._entities[username] = entity
+
+        stmt = select(Channel).where(Channel.telegram_id == entity.id)
+        channel = (await session.execute(stmt)).scalar_one_or_none()
+
+        if channel:
+            channel.username = username
+            channel.title = getattr(entity, "title", username)
+            channel.enabled = True
+            channel.updated_at = datetime.now(timezone.utc)
+        else:
+            channel = Channel(
+                telegram_id=entity.id,
+                username=username,
+                title=getattr(entity, "title", username),
+                enabled=True,
+            )
+            session.add(channel)
+
+        await session.commit()
+        await session.refresh(channel)
+        return channel
+
     def get_entity(self, username: str):
         return self._entities.get(username)
+
+    def remove_entity(self, username: str):
+        self._entities.pop(username, None)
+
+    def get_all_entities(self) -> list:
+        return list(self._entities.values())

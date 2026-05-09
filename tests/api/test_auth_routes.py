@@ -105,6 +105,30 @@ class TestLogoutAPI:
         assert resp.json()["status"] == "logged_out"
 
 
+class TestSessionLoginAPI:
+    async def test_success(self, client, test_app):
+        test_app.state.telegram_client.import_session = AsyncMock(
+            return_value={"id": 123, "first_name": "Test", "last_name": "", "username": "test", "phone": "+1234567890"}
+        )
+        resp = await client.post("/api/auth/session-login", json={"session_string": "valid_session"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "success"
+        assert data["user"]["id"] == 123
+
+    async def test_empty_string(self, client):
+        resp = await client.post("/api/auth/session-login", json={"session_string": ""})
+        assert resp.status_code == 400
+
+    async def test_invalid_session(self, client, test_app):
+        test_app.state.telegram_client.import_session = AsyncMock(
+            side_effect=ValueError("Session 已失效或未授权，请提供有效的 Session")
+        )
+        resp = await client.post("/api/auth/session-login", json={"session_string": "bad_session"})
+        assert resp.status_code == 400
+        assert "error" in resp.json()
+
+
 class TestAuthRequired:
     async def test_all_routes_need_auth(self, unauthed_client):
         routes = [
@@ -113,6 +137,7 @@ class TestAuthRequired:
             ("POST", "/api/auth/qr-login/refresh"),
             ("POST", "/api/auth/phone-login/send-code"),
             ("GET", "/api/auth/phone-login/status"),
+            ("POST", "/api/auth/session-login"),
             ("GET", "/api/auth/status"),
             ("POST", "/api/auth/logout"),
         ]
