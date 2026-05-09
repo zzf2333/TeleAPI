@@ -84,3 +84,43 @@ class TelegramClientManager:
         if SESSION_FILE.exists():
             SESSION_FILE.unlink()
         logger.info("Telegram session cleared")
+
+    async def import_session(self, session_string: str) -> dict:
+        try:
+            StringSession(session_string)
+        except Exception as e:
+            raise ValueError(f"Session 字符串格式无效: {e}")
+
+        temp_client = TelegramClient(
+            StringSession(session_string),
+            self._api_id,
+            self._api_hash,
+        )
+        try:
+            await temp_client.connect()
+            if not await temp_client.is_user_authorized():
+                raise ValueError("Session 已失效或未授权，请提供有效的 Session")
+            me = await temp_client.get_me()
+            user_info = {
+                "id": me.id,
+                "first_name": me.first_name or "",
+                "last_name": me.last_name or "",
+                "username": me.username or "",
+                "phone": me.phone or "",
+            }
+        except ValueError:
+            raise
+        except Exception as e:
+            raise ValueError(f"无法验证 Session: {e}")
+        finally:
+            await temp_client.disconnect()
+
+        await self.disconnect()
+
+        tmp = SESSION_FILE.with_suffix(".tmp")
+        tmp.write_text(session_string)
+        tmp.rename(SESSION_FILE)
+        logger.info("Imported external session, saved to %s", SESSION_FILE)
+
+        await self.connect()
+        return user_info

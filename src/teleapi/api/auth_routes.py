@@ -112,6 +112,20 @@ async def submit_2fa(request: Request):
     return resp
 
 
+@router.post("/session-login")
+async def session_login(request: Request):
+    body = await request.json()
+    session_string = body.get("session_string", "").strip()
+    if not session_string:
+        return JSONResponse({"error": "session_string is required"}, status_code=400)
+    cm = _get_client_manager(request)
+    try:
+        user_info = await cm.import_session(session_string)
+        return {"status": "success", "user": user_info}
+    except ValueError as e:
+        return JSONResponse({"status": "error", "error": str(e)}, status_code=400)
+
+
 @router.get("/status")
 async def auth_status(request: Request):
     cm = _get_client_manager(request)

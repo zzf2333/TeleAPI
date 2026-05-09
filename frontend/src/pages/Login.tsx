@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { setApiKey, getApiKey, api } from '../api/client';
-import { KeyRound, QrCode, Smartphone, ShieldCheck } from 'lucide-react';
+import { KeyRound, QrCode, Smartphone, ShieldCheck, FileKey } from 'lucide-react';
 
 export default function Login() {
     const location = useLocation();
@@ -12,7 +12,7 @@ export default function Login() {
     const [authed, setAuthed] = useState(skipKey);
     const navigate = useNavigate();
 
-    const [loginMethod, setLoginMethod] = useState<'qr' | 'phone'>('qr');
+    const [loginMethod, setLoginMethod] = useState<'qr' | 'phone' | 'session'>('qr');
 
     const [qrImage, setQrImage] = useState('');
     const [qrStatus, setQrStatus] = useState('');
@@ -22,6 +22,9 @@ export default function Login() {
     const [phoneStatus, setPhoneStatus] = useState('');
 
     const [password, setPassword] = useState('');
+
+    const [sessionString, setSessionString] = useState('');
+    const [sessionLoading, setSessionLoading] = useState(false);
 
     async function handleKeySubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -124,6 +127,24 @@ export default function Login() {
         }
     }
 
+    async function handleSessionImport(e: React.FormEvent) {
+        e.preventDefault();
+        setError('');
+        setSessionLoading(true);
+        try {
+            const data = await api<{ status: string; error?: string }>(
+                '/api/auth/session-login',
+                { method: 'POST', body: JSON.stringify({ session_string: sessionString }) },
+            );
+            if (data.status === 'success') navigate('/');
+            else if (data.error) setError(data.error);
+        } catch (e: unknown) {
+            setError(String(e));
+        } finally {
+            setSessionLoading(false);
+        }
+    }
+
     const show2fa = qrStatus === '2fa_required' || phoneStatus === '2fa_required';
 
     const inputClass = 'w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-colors';
@@ -180,6 +201,17 @@ export default function Login() {
                                     >
                                         <Smartphone className="w-4 h-4" />
                                         手机号登录
+                                    </button>
+                                    <button
+                                        onClick={() => { setLoginMethod('session'); setError(''); }}
+                                        className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+                                            loginMethod === 'session'
+                                                ? 'border-cyan-400 text-cyan-400'
+                                                : 'border-transparent text-slate-500 hover:text-slate-300'
+                                        }`}
+                                    >
+                                        <FileKey className="w-4 h-4" />
+                                        Session 导入
                                     </button>
                                 </div>
 
@@ -271,6 +303,32 @@ export default function Login() {
                                             </div>
                                         )}
                                     </>
+                                )}
+
+                                {loginMethod === 'session' && (
+                                    <form onSubmit={handleSessionImport} className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-400 mb-1">
+                                                StringSession 字符串
+                                            </label>
+                                            <textarea
+                                                value={sessionString}
+                                                onChange={(e) => setSessionString(e.target.value)}
+                                                className={inputClass + ' resize-none h-24 font-mono text-xs'}
+                                                placeholder="粘贴 Telethon StringSession 字符串..."
+                                            />
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                通过 Telethon 生成的 Session 字符串
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={!sessionString.trim() || sessionLoading}
+                                            className={primaryBtn + ((!sessionString.trim() || sessionLoading) ? ' opacity-60 cursor-not-allowed' : '')}
+                                        >
+                                            {sessionLoading ? '验证中...' : '导入 Session'}
+                                        </button>
+                                    </form>
                                 )}
 
                                 <button
