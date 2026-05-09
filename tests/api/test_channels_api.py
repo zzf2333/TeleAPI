@@ -1,13 +1,8 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
-
-from teleapi.models.channel import Channel
-from teleapi.models.message import Message
-from teleapi.models.sync_job import SyncJob
 
 
 pytestmark = pytest.mark.api
